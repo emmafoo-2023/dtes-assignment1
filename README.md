@@ -1,30 +1,58 @@
-# GreenPlate mobile app
+# GreenPlate - Eco-Food Tracker
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+A web app that helps users track their food's carbon footprint, make sustainable choices, and build eco-friendly eating habits.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/emmafoo-2023s-projects/v0-green-plate-mobile-app)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/FqRp2iQdzbR)
+## Prerequisites
 
-## Overview
+- **Node.js** (v18.0.0 or higher)
+- **npm** (v9.0.0 or higher)
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## Installation
 
-## Deployment
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd dtes-assignment1
+```
 
-Your project is live at:
+2. Install dependencies:
+```bash
+npm install
+```
 
-**[https://vercel.com/emmafoo-2023s-projects/v0-green-plate-mobile-app](https://vercel.com/emmafoo-2023s-projects/v0-green-plate-mobile-app)**
+## Running the Application
 
-## Build your app
+Start the development server:
+```bash
+npm run dev
+```
 
-Continue building your app on:
+The app will be available at:
+- Local: http://localhost:3000
+- Network: http://[your-ip]:3000
 
-**[https://v0.app/chat/projects/FqRp2iQdzbR](https://v0.app/chat/projects/FqRp2iQdzbR)**
+## Features
 
-## How It Works
+- **Scan Meals**: Upload food photos to track CO�e impact
+- **Challenges**: Join eco-friendly eating challenges
+- **Community Feed**: Share your sustainable food journey
+- **Dashboard**: Track progress, streaks, and achievements
+- **Explore Deals**: Find discounts on sustainable food options
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## Tech Stack
+
+- Next.js 15.2.4
+- React 19
+- TypeScript
+- Tailwind CSS
+- Zustand (State Management)
+- Recharts (Data Visualization)
+
+## Data Storage
+
+The app uses browser localStorage to persist data. To reset:
+1. Open Developer Tools (F12)
+2. Go to Application/Storage tab
+3. Find localStorage � your domain
+4. Delete `greenplate-storage` key
+5. Refresh the page

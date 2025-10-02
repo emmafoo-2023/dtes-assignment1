@@ -134,7 +134,6 @@ export const MOCK_POSTS: Post[] = [
   {
     id: "post-1",
     author: "Sarah Chen",
-    avatar: "/asian-woman-avatar.png",
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
     content: "Just tried this amazing tofu laksa! So much better than I expected and way better for the planet 🌱",
     image: "/tofu-laksa-bowl.jpg",
@@ -145,7 +144,6 @@ export const MOCK_POSTS: Post[] = [
   {
     id: "post-2",
     author: "Marcus Lim",
-    avatar: "/asian-man-avatar.png",
     timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
     content: "Week 3 of my plant-based journey! Feeling great and my carbon footprint is way down 💪",
     likes: 18,
@@ -155,7 +153,6 @@ export const MOCK_POSTS: Post[] = [
   {
     id: "post-3",
     author: "Priya Kumar",
-    avatar: "/indian-woman-avatar.png",
     timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
     content: "Made tempeh rice bowl for the first time. The family loved it! Recipe in comments 👇",
     image: "/tempeh-rice-bowl.jpg",
@@ -166,7 +163,6 @@ export const MOCK_POSTS: Post[] = [
   {
     id: "post-4",
     author: "David Wong",
-    avatar: "/asian-man-avatar.png",
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
     content: "Hit my 30-day streak today! 🎉 Small changes really do add up",
     likes: 45,
@@ -176,7 +172,6 @@ export const MOCK_POSTS: Post[] = [
   {
     id: "post-5",
     author: "Emma Tan",
-    avatar: "/asian-woman-avatar.png",
     timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
     content: "Swapped my usual beef noodles for veggie noodles today. Saved 2.6kg of CO2e! 🌍",
     image: "/vegetable-noodles.jpg",
@@ -187,7 +182,7 @@ export const MOCK_POSTS: Post[] = [
 ]
 
 export const MOCK_FRIENDS = [
-  { id: "friend-1", name: "Sarah Chen", points: 450, avatar: "/asian-woman-avatar.png" },
-  { id: "friend-2", name: "Marcus Lim", points: 380, avatar: "/asian-man-avatar.png" },
-  { id: "friend-3", name: "Priya Kumar", points: 320, avatar: "/indian-woman-avatar.png" },
+  { id: "friend-1", name: "Sarah Chen", points: 450 },
+  { id: "friend-2", name: "Marcus Lim", points: 380 },
+  { id: "friend-3", name: "Priya Kumar", points: 320 },
 ]

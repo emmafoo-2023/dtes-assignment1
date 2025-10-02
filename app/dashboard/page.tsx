@@ -32,11 +32,11 @@ export default function DashboardPage() {
   const currentStreak = calculateStreak()
 
   const leaderboard = [
-    { name: "You", points: points, avatar: "/asian-woman-avatar.png", rank: 1 },
-    { name: "Sarah L.", points: 2840, avatar: "/indian-woman-avatar.png", rank: 2 },
-    { name: "Mike C.", points: 2650, avatar: "/asian-man-avatar.png", rank: 3 },
-    { name: "Emma W.", points: 2420, avatar: "/asian-woman-avatar.png", rank: 4 },
-    { name: "David K.", points: 2180, avatar: "/asian-man-avatar.png", rank: 5 },
+    { name: "You", points: points, rank: 1 },
+    { name: "Sarah L.", points: 2840, rank: 2 },
+    { name: "Mike C.", points: 2650, rank: 3 },
+    { name: "Emma W.", points: 2420, rank: 4 },
+    { name: "David K.", points: 2180, rank: 5 },
   ]
     .sort((a, b) => b.points - a.points)
     .map((user, index) => ({ ...user, rank: index + 1 }))
@@ -231,7 +231,6 @@ export default function DashboardPage() {
                     >
                       {user.rank}
                     </div>
-                    <img src={user.avatar || "/placeholder.svg"} alt={user.name} className="w-8 h-8 rounded-full" />
                     <div className="flex-1">
                       <p className="font-medium text-foreground">{user.name}</p>
                       <p className="text-sm text-muted-foreground">{user.points} points</p>

@@ -24,17 +24,22 @@ const createInitialLogs = (): LogEntry[] => {
   const logs: LogEntry[] = []
   const now = new Date()
 
+  // Use a seeded pattern instead of random to avoid hydration mismatches
+  const mealPattern = [2, 1, 3, 2, 1, 2, 3, 1, 2, 2, 1, 3, 2, 1] // Fixed pattern for 14 days
+  const dishPattern = [0, 2, 4, 1, 3, 5, 0, 3, 2, 4, 1, 5, 0, 2] // Fixed dish indices
+
   // Create logs for the past 14 days with varying meals
   for (let i = 13; i >= 0; i--) {
     const date = new Date(now)
     date.setDate(date.getDate() - i)
 
-    // Add 1-3 meals per day
-    const mealsPerDay = Math.floor(Math.random() * 3) + 1
+    // Use fixed pattern instead of random
+    const mealsPerDay = mealPattern[i] || 2
     for (let j = 0; j < mealsPerDay; j++) {
-      const dish = DISHES[Math.floor(Math.random() * DISHES.length)]
+      const dishIndex = (dishPattern[i] + j) % DISHES.length
+      const dish = DISHES[dishIndex]
       logs.push({
-        id: `log-${date.getTime()}-${j}`,
+        id: `log-${i}-${j}`, // Simpler ID that doesn't change
         dishId: dish.id,
         dishName: dish.name,
         co2e_kg: dish.co2e_kg,
@@ -59,7 +64,7 @@ const createInitialChallenges = (): typeof INITIAL_CHALLENGES => {
 const useAppStore = create<AppStore>()(
   persist(
     (set, get) => ({
-      logs: createInitialLogs(),
+      logs: [],
       challenges: createInitialChallenges(),
       points: 850, // Starting points
       streakDays: 0,
@@ -254,6 +259,20 @@ const useAppStore = create<AppStore>()(
     }),
     {
       name: "greenplate-storage",
+      partialize: (state) => ({
+        logs: state.logs,
+        challenges: state.challenges,
+        points: state.points,
+        posts: state.posts,
+        savedDeals: state.savedDeals,
+        badges: state.badges,
+      }),
+      onRehydrateStorage: () => (state) => {
+        // Only add initial logs if storage is empty
+        if (state && state.logs.length === 0) {
+          state.logs = createInitialLogs()
+        }
+      },
     },
   ),
 )

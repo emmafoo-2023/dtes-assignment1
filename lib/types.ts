@@ -33,7 +33,7 @@ export interface Challenge {
 export interface Post {
   id: string
   author: string
-  avatar: string
+  avatar?: string
   timestamp: string | Date
   content: string
   image?: string

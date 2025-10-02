@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,8 +17,10 @@ export default function ScanPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [predictedDish, setPredictedDish] = useState(DISHES[0])
   const [selectedDish, setSelectedDish] = useState(DISHES[0])
-  const [swapSuggestions, setSwapSuggestions] = useState<typeof DISHES>([])
+  const [ingredientSuggestions, setIngredientSuggestions] = useState<string[]>([])
+  const [sustainabilityTips, setSustainabilityTips] = useState<string[]>([])
   const [challengeResults, setChallengeResults] = useState<string[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { logMeal, checkChallenges, addPost } = useAppStore()
   const router = useRouter()
@@ -47,12 +49,49 @@ export default function ScanPage() {
   }
 
   const handleConfirm = () => {
-    // Generate swap suggestions (lower CO2e alternatives)
-    const suggestions = DISHES.filter((d) => d.co2e_kg < selectedDish.co2e_kg && d.id !== selectedDish.id)
-      .sort((a, b) => a.co2e_kg - b.co2e_kg)
-      .slice(0, 3)
+    // Generate ingredient suggestions and tips based on meal type
+    if (selectedDish.isPlantBased || selectedDish.co2e_kg < 2) {
+      // Eco-friendly meal - no ingredient swaps needed
+      setIngredientSuggestions([])
+      setSustainabilityTips([
+        "Look for locally sourced vegetables to reduce transport emissions",
+        "Choose seasonal produce for maximum freshness and minimal environmental impact",
+        "Consider buying from farmers' markets to support local agriculture"
+      ])
+    } else {
+      // Higher carbon meal - suggest ingredient swaps
+      const suggestions: string[] = []
+      const tips: string[] = []
 
-    setSwapSuggestions(suggestions)
+      if (selectedDish.name.toLowerCase().includes('beef') || selectedDish.name.toLowerCase().includes('steak')) {
+        suggestions.push("Replace beef with mushrooms or jackfruit for a meaty texture")
+        suggestions.push("Try plant-based proteins like tempeh or tofu")
+        suggestions.push("Use lentils or beans for a protein-rich alternative")
+      } else if (selectedDish.name.toLowerCase().includes('chicken')) {
+        suggestions.push("Substitute with chickpeas or cauliflower")
+        suggestions.push("Try seitan or plant-based chicken alternatives")
+        suggestions.push("Use tofu marinated in herbs and spices")
+      } else if (selectedDish.name.toLowerCase().includes('pork') || selectedDish.name.toLowerCase().includes('lamb')) {
+        suggestions.push("Replace with jackfruit for pulled texture")
+        suggestions.push("Use mushrooms like shiitake or portobello")
+        suggestions.push("Try seasoned tempeh or textured vegetable protein")
+      } else if (selectedDish.name.toLowerCase().includes('fish') || selectedDish.name.toLowerCase().includes('seafood')) {
+        suggestions.push("Use hearts of palm or banana blossom for seafood texture")
+        suggestions.push("Try nori-wrapped tofu for ocean flavors")
+        suggestions.push("Consider plant-based seafood alternatives")
+      } else {
+        suggestions.push("Add more vegetables to reduce meat portions")
+        suggestions.push("Try meatless versions once a week")
+        suggestions.push("Use plant proteins as partial substitutes")
+      }
+
+      tips.push("Choose grass-fed and locally raised options if continuing with meat")
+      tips.push("Buy from local butchers who source sustainably")
+      tips.push("Consider reducing portion sizes and adding more vegetables")
+
+      setIngredientSuggestions(suggestions)
+      setSustainabilityTips(tips)
+    }
 
     // Log the meal and get challenge results
     logMeal(selectedDish.id, selectedImage || undefined)
@@ -75,7 +114,6 @@ export default function ScanPage() {
 
     addPost({
       author: "You",
-      avatar: "/diverse-user-avatars.png",
       content: `Just had ${selectedDish.name}! ${selectedDish.isPlantBased ? `Saved ${selectedDish.co2e_kg}kg CO₂e 🌱` : `Tracked ${selectedDish.co2e_kg}kg CO₂e`}`,
       image: selectedImage,
       likes: 0,
@@ -103,19 +141,22 @@ export default function ScanPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                        <Upload className="h-4 w-4 mr-2" />
-                        Upload Photo
-                      </Button>
-                      <input
-                        id="image-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </label>
+                    <Button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                      type="button"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Photo
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      aria-label="Upload image"
+                    />
 
                     <p className="text-sm text-muted-foreground">Take a photo of your meal or upload from gallery</p>
                   </div>
@@ -230,32 +271,58 @@ export default function ScanPage() {
               </Card>
             )}
 
-            {/* Swap Suggestions */}
-            {swapSuggestions.length > 0 && (
-              <Card className="glass-effect glass-effect-dark shadow-lg border-chart-5/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Lightbulb className="h-5 w-5 text-chart-5" />
-                    <span>Eco-Friendly Alternatives</span>
-                  </CardTitle>
-                  <CardDescription>Try these lower-carbon options next time</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {swapSuggestions.map((dish) => (
-                    <div
-                      key={dish.id}
-                      className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20"
-                    >
-                      <div>
-                        <p className="font-medium text-foreground">{dish.name}</p>
-                        <p className="text-sm text-muted-foreground">{dish.isPlantBased ? "Plant-based" : "Regular"}</p>
+            {/* Feedback Card */}
+            <Card className="glass-effect glass-effect-dark shadow-lg border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  {(selectedDish.isPlantBased || selectedDish.co2e_kg < 2) ? (
+                    <>
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      <span>Great Choice! 🌱</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lightbulb className="h-5 w-5 text-chart-5" />
+                      <span>Make It Even Greener!</span>
+                    </>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  {(selectedDish.isPlantBased || selectedDish.co2e_kg < 2)
+                    ? "You're making a positive impact on the environment!"
+                    : "Here are some ways to reduce your carbon footprint"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Ingredient Suggestions */}
+                {ingredientSuggestions.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-foreground">Ingredient Swaps:</h4>
+                    {ingredientSuggestions.map((suggestion, index) => (
+                      <div key={index} className="flex items-start space-x-2">
+                        <span className="text-primary mt-1">•</span>
+                        <p className="text-sm text-muted-foreground">{suggestion}</p>
                       </div>
-                      <Badge className="bg-primary/10 text-primary border-primary/20">{dish.co2e_kg}kg CO₂e</Badge>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+                    ))}
+                  </div>
+                )}
+
+                {/* Sustainability Tips */}
+                {sustainabilityTips.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-foreground">
+                      {ingredientSuggestions.length > 0 ? "Additional Tips:" : "Sustainability Tips:"}
+                    </h4>
+                    {sustainabilityTips.map((tip, index) => (
+                      <div key={index} className="flex items-start space-x-2">
+                        <span className="text-primary mt-1">💡</span>
+                        <p className="text-sm text-muted-foreground">{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             <div className="space-y-3">
               <Button onClick={handleShareToCommunity} className="w-full bg-transparent" variant="outline">

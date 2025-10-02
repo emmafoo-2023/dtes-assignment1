@@ -1,13 +1,19 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import useAppStore from "@/lib/store"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, LabelList, Tooltip } from "recharts"
 import { Leaf, Trophy, Target, TrendingUp, Award, Star, Zap, Heart } from "lucide-react"
 
 export default function HomePage() {
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
   const { logs, challenges, points, posts, getWeeklyTotal, calculateStreak } = useAppStore()
 
   const weeklyData = Array.from({ length: 7 }, (_, i) => {
@@ -17,18 +23,20 @@ export default function HomePage() {
       const logDate = new Date(log.timestamp)
       return logDate.toDateString() === date.toDateString()
     })
-    const totalSavings = dayLogs.reduce((sum, log) => sum + log.co2e_kg, 0)
+    const totalConsumption = dayLogs.reduce((sum, log) => sum + log.co2e_kg, 0)
     return {
       day: date.toLocaleDateString("en-US", { weekday: "short" }),
-      savings: totalSavings,
+      consumption: totalConsumption,
+      consumptionFormatted: totalConsumption > 0 ? `${totalConsumption.toFixed(2)}kg` : '',
       meals: dayLogs.length,
     }
   })
 
-  const totalCO2eSaved = logs.reduce((sum, log) => sum + log.co2e_kg, 0)
+  const totalCO2eConsumed = logs.reduce((sum, log) => sum + log.co2e_kg, 0)
   const totalMeals = logs.length
   const completedChallenges = challenges.filter((c) => c.isCompleted).length
-  const avgDailySavings = totalCO2eSaved / 7
+  const daysWithMeals = weeklyData.filter(day => day.consumption > 0).length
+  const avgDailyConsumption = daysWithMeals > 0 ? totalCO2eConsumed / daysWithMeals : 0
   const currentStreak = calculateStreak()
 
   const plantBasedCount = logs.filter((log) => {
@@ -48,17 +56,17 @@ export default function HomePage() {
   ].filter((item) => item.value > 0)
 
   const leaderboard = [
-    { name: "You", points: points, avatar: "/asian-woman-avatar.png", rank: 1 },
-    { name: "Sarah L.", points: 2840, avatar: "/indian-woman-avatar.png", rank: 2 },
-    { name: "Mike C.", points: 2650, avatar: "/asian-man-avatar.png", rank: 3 },
-    { name: "Emma W.", points: 2420, avatar: "/asian-woman-avatar.png", rank: 4 },
-    { name: "David K.", points: 2180, avatar: "/asian-man-avatar.png", rank: 5 },
+    { name: "You", points: isClient ? points : 0, rank: 1 },
+    { name: "Sarah L.", points: 2840, rank: 2 },
+    { name: "Mike C.", points: 2650, rank: 3 },
+    { name: "Emma W.", points: 2420, rank: 4 },
+    { name: "David K.", points: 2180, rank: 5 },
   ]
     .sort((a, b) => b.points - a.points)
     .map((user, index) => ({ ...user, rank: index + 1 }))
 
   const availableBadges = [
-    { id: "eco-warrior", name: "Eco Warrior", icon: Leaf, earned: totalCO2eSaved >= 50, color: "text-green-500" },
+    { id: "eco-warrior", name: "Eco Warrior", icon: Leaf, earned: totalCO2eConsumed >= 50, color: "text-green-500" },
     { id: "streak-master", name: "Streak Master", icon: Zap, earned: currentStreak >= 7, color: "text-yellow-500" },
     {
       id: "challenge-champion",
@@ -90,8 +98,8 @@ export default function HomePage() {
                     <Leaf className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">CO₂e Saved</p>
-                    <p className="text-xl lg:text-2xl font-bold text-primary">{totalCO2eSaved.toFixed(1)}kg</p>
+                    <p className="text-sm text-muted-foreground">CO₂e Tracked</p>
+                    <p className="text-xl lg:text-2xl font-bold text-primary">{totalCO2eConsumed.toFixed(1)}kg</p>
                   </div>
                 </div>
               </CardContent>
@@ -133,7 +141,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Daily Avg</p>
-                    <p className="text-xl lg:text-2xl font-bold text-chart-5">{avgDailySavings.toFixed(1)}kg</p>
+                    <p className="text-xl lg:text-2xl font-bold text-chart-5">{avgDailyConsumption.toFixed(1)}kg</p>
                   </div>
                 </div>
               </CardContent>
@@ -145,25 +153,19 @@ export default function HomePage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
-                  <span>Weekly CO₂e Savings</span>
+                  <span>CO₂e (This Week)</span>
                 </CardTitle>
-                <CardDescription>Your environmental impact this week</CardDescription>
+                <CardDescription>Daily consumption breakdown</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={weeklyData}>
+                  <BarChart data={isClient ? weeklyData : []}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" />
                     <YAxis stroke="hsl(var(--muted-foreground))" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                      }}
-                    />
-                    <Bar dataKey="savings" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="consumption" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="consumptionFormatted" position="top" style={{ fill: "hsl(var(--foreground))", fontSize: '12px', fontWeight: '500' }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -183,7 +185,7 @@ export default function HomePage() {
                     <ResponsiveContainer width="100%" height={200}>
                       <PieChart>
                         <Pie
-                          data={mealTypeData}
+                          data={isClient ? mealTypeData : []}
                           cx="50%"
                           cy="50%"
                           innerRadius={40}
@@ -250,7 +252,6 @@ export default function HomePage() {
                     >
                       {user.rank}
                     </div>
-                    <img src={user.avatar || "/placeholder.svg"} alt={user.name} className="w-8 h-8 rounded-full" />
                     <div className="flex-1">
                       <p className="font-medium text-foreground">{user.name}</p>
                       <p className="text-sm text-muted-foreground">{user.points} points</p>
@@ -273,25 +274,26 @@ export default function HomePage() {
                 <div className="grid grid-cols-2 gap-4">
                   {availableBadges.map((badge) => {
                     const IconComponent = badge.icon
+                    const earned = isClient ? badge.earned : false
                     return (
                       <div
                         key={badge.id}
                         className={`p-4 rounded-lg border transition-all ${
-                          badge.earned
+                          earned
                             ? "bg-primary/5 border-primary/20 shadow-sm"
                             : "bg-muted/50 border-border/50 opacity-60"
                         }`}
                       >
                         <div className="text-center space-y-2">
                           <IconComponent
-                            className={`h-8 w-8 mx-auto ${badge.earned ? badge.color : "text-muted-foreground"}`}
+                            className={`h-8 w-8 mx-auto ${earned ? badge.color : "text-muted-foreground"}`}
                           />
                           <p
-                            className={`text-sm font-medium ${badge.earned ? "text-foreground" : "text-muted-foreground"}`}
+                            className={`text-sm font-medium ${earned ? "text-foreground" : "text-muted-foreground"}`}
                           >
                             {badge.name}
                           </p>
-                          {badge.earned && (
+                          {earned && (
                             <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
                               Earned!
                             </Badge>
@@ -313,14 +315,14 @@ export default function HomePage() {
                   <p className="text-muted-foreground">Keep up the great work!</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl lg:text-4xl font-bold text-chart-4">{currentStreak}</p>
+                  <p className="text-3xl lg:text-4xl font-bold text-chart-4">{isClient ? currentStreak : 0}</p>
                   <p className="text-muted-foreground">days</p>
                 </div>
               </div>
               <div className="mt-4">
-                <Progress value={(currentStreak % 7) * 14.28} className="bg-muted/50" />
+                <Progress value={isClient ? (currentStreak % 7) * 14.28 : 0} className="bg-muted/50" />
                 <p className="text-sm mt-2 text-muted-foreground">
-                  {7 - (currentStreak % 7)} days until next milestone
+                  {isClient ? 7 - (currentStreak % 7) : 7} days until next milestone
                 </p>
               </div>
             </CardContent>
