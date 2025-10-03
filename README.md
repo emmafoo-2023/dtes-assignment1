@@ -39,15 +39,6 @@ The app will be available at:
 - **Dashboard**: Track progress, streaks, and achievements
 - **Explore Deals**: Find discounts on sustainable food options
 
-## Tech Stack
-
-- Next.js 15.2.4
-- React 19
-- TypeScript
-- Tailwind CSS
-- Zustand (State Management)
-- Recharts (Data Visualization)
-
 ## Data Storage
 
 The app uses browser localStorage to persist data. To reset:
