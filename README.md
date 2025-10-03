@@ -7,20 +7,14 @@ A web app that helps users track their food's carbon footprint, make sustainable
 - **Node.js** (v18.0.0 or higher)
 - **npm** (v9.0.0 or higher)
 
-## Installation
+## 1. Installation
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd dtes-assignment1
-```
-
-2. Install dependencies:
+Install dependencies:
 ```bash
 npm install
 ```
 
-## Running the Application
+## 2. Running the Application
 
 Start the development server:
 ```bash
